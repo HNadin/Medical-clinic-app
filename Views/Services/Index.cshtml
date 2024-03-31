@@ -1,0 +1,301 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Security.Claims
+@model IEnumerable<ServiceViewModel>
+@inject UserManager<IdentityUser> UserManager
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Services</h1>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 0;
+    }
+
+    h1 {
+        margin: 10px;
+        text-align: center;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 10px 0;
+    }
+
+    table, th, td {
+        border: 1px solid #ccc;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .centered-button {
+        text-align: center;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background-color: #fff;
+        border-radius: 4px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    input {
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .btn-container {
+        text-align: center;
+    }
+
+    a {
+        text-decoration: none;
+        color: #007BFF;
+        margin-right: 10px;
+    }
+</style>
+
+@if (User.Identity.IsAuthenticated)
+{
+    var user = await UserManager.GetUserAsync(User);
+    if (user != null)
+    {
+        <input type="hidden" id="userId" name="userId" value="@user.Id" />
+    }
+}
+
+<div class="centered-button">
+    <div class="centered-button">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <button onclick="bookAppointment()">Make an appointment</button>
+        }
+        else
+        {
+            <p>You need to be logged in to make an appointment. <a href="~/Identity/Account/Login">Log in</a></p>
+        }
+    </div>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Service.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Service.Description)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Service.Price)
+        </th>
+        <th>
+            Doctors
+        </th>
+        <th>
+            Nurses
+        </th>
+        @if (User.IsInRole("Admin"))
+        {
+            <th></th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Service.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Service.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Service.Price)
+            </td>
+            <td>
+                @if (item.Doctors.Any())
+                {
+                    @string.Join(", ", item.Doctors)
+                }
+            </td>
+            <td>
+                @if (item.Nurses.Any())
+                {
+                    @string.Join(", ", item.Nurses)
+                }
+            </td>
+            @if (User.IsInRole("Admin"))
+            {
+                <td class="button-group">
+                    <a asp-action="Edit" asp-route-id="@item.Service.Id">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Service.Id">Delete</a>
+                </td>
+            }
+            @* <a asp-action="Details" asp-route-id="@item.Service.Id">Details</a> *@
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div>
+        <p>Підписатися на розсилку, щоб отримувати інформацію про нові медичні послуги.</p>
+
+        @if (ViewBag.IsSubscribed)
+        {
+            <a asp-controller="Subscription" asp-action="UnsubscribeFromUpdates" class="btn btn-danger">Відписатися від розсилки</a>
+        }
+        else
+        {
+            <a asp-controller="Subscription" asp-action="SubscribeToUpdates" class="btn btn-primary">Підписатися на розсилку</a>
+        }
+    </div>
+}
+
+
+<br />
+@if (User.IsInRole("Admin"))
+{
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+}
+
+<!-- Модальне вікно для бронювання -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3>Service reservation</h3>
+        <form method="post" action="@Url.Action("BookAppointment", "Services")">
+            <label for="service">Service:</label>
+            <select id="service" name="serviceId">
+                <option value=""></option>
+                @foreach (var item in Model)
+                {
+                    <option value="@item.Service.Id">@item.Service.Name</option>
+                }
+            </select>
+            <label for="doctor">Doctor:</label>
+            <select id="doctor" name="doctor">
+                <!-- Параметри лікаря буде заповнено за допомогою JavaScript -->
+            </select>
+            <label for="date">Date and Time:</label>
+            <input type="datetime-local" id="date" name="DateTime" required>
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required>
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+            <input type="hidden" id="userId" name="userId" value="" /> 
+            <div class="btn-container">
+                <button type="submit">Book</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script>
+    // Функція викликається при кліці на кнопку "Make an appointment"
+    function bookAppointment() {
+        // Установіть ID користувача в приховане поле вводу
+        var userIdInput = document.getElementById("userId");
+        if (userIdInput) {
+            // Встановлення значення ID користувача за допомогою сервісу UserManager на стороні сервера
+            userIdInput.value = "@UserManager.GetUserId(User)";
+        }
+
+        // Відкриття модального вікна запису
+        var modal = document.getElementById("bookingModal");
+        modal.style.display = "block";
+    }
+
+    // Функція закриває модальне вікно
+    function closeModal() {
+        var modal = document.getElementById("bookingModal");
+        modal.style.display = "none";
+    }
+
+    // Обробник події при зміні обраної послуги
+    document.getElementById("service").addEventListener("change", function () {
+        // Отримання значення ID обраної послуги
+        var serviceId = this.value;
+        var doctorSelect = document.getElementById("doctor");
+
+        // Виконання AJAX-запиту на сервер для отримання списку лікарів для обраної послуги
+        // Відправлення serviceId на сервер і отримання списку лікарів
+
+        // Приклад використання Fetch API:
+        fetch("/Services/GetDoctorsForService?serviceId=" + serviceId)
+            .then(response => response.json())
+            .then(data => {
+                // Очищення поточного списку лікарів
+                doctorSelect.innerHTML = "";
+
+                // Додавання нових опцій до списку лікарів на основі отриманих даних
+                data.forEach(doctor => {
+                    var option = document.createElement("option");
+                    option.value = doctor;
+                    option.text = doctor;
+                    doctorSelect.appendChild(option);
+                });
+            });
+    });
+</script>

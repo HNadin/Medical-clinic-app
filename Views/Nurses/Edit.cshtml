@@ -1,0 +1,69 @@
+﻿@model Medical_clinic.Models.Nurse
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<style>
+    a {
+        text-decoration: none;
+        color: #007BFF;
+        margin-right: 10px;
+    }
+</style>
+
+<h4>Nurse</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="PhotoPath" class="control-label">Photo</label>
+                <div class="custom-file">
+                    <input asp-for="PhotoPath" class="custom-file-input" id="customFile">
+                    <label class="custom-file-label" for="customFile"></label>
+                </div>
+                <span asp-validation-for="PhotoPath" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FullName" class="control-label"></label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Education" class="control-label"></label>
+                <input asp-for="Education" class="form-control" />
+                <span asp-validation-for="Education" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CertificationTraining" class="control-label"></label>
+                <input asp-for="CertificationTraining" class="form-control" />
+                <span asp-validation-for="CertificationTraining" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Specialization" class="control-label"></label>
+                <select asp-for="Specialization" asp-items="ViewBag.SpecializationList" class="form-control"></select>
+                <span asp-validation-for="Specialization" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="WorkScheduleData" class="control-label"></label>
+                <input asp-for="WorkScheduleData" class="form-control" />
+                <span asp-validation-for="WorkScheduleData" class="text-danger"></span>
+            </div>
+            <div class="form-group" style="margin-top: 10px;">
+                <input type="submit" value="Update" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

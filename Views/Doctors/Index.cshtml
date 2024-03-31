@@ -1,0 +1,97 @@
+﻿@model List<Doctor>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Doctors</h1>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        margin: 10px;
+    }
+
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .card {
+        width: 300px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: center;
+    }
+
+        .card img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+
+        .card p {
+            font-size: 14px;
+        }
+
+        .card a {
+            text-decoration: none;
+            color: #007BFF;
+            margin-right: 10px;
+        }
+
+</style>
+
+<div class="card-container">
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var doctors in Model)
+        {
+            <div class="card">
+                <img src="/images/doctors/@(doctors.FullName.Replace(" ", "_").ToLower()).jpg" />
+                <h3>@Html.DisplayFor(model => doctors.FullName)</h3>
+                <p><strong>Education:</strong>  @Html.DisplayFor(model => doctors.Education)</p>
+                <p><strong>Specialization:</strong> @Html.DisplayFor(modelItem => doctors.Specialization)</p>
+                @if (doctors.CertificationTraining != null)
+                {
+                    <p><strong>Certification Training:</strong> @Html.DisplayFor(model => doctors.CertificationTraining)</p>
+                }
+                <p><strong>Work Schedule:</strong> @Html.DisplayFor(model => doctors.WorkScheduleData)</p>
+                <div class="button-group">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@doctors.Id">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@doctors.Id">Delete</a>
+                    }
+                    <a asp-action="Details" asp-route-id="@doctors.Id">Details</a>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No doctors available.</p>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="btn btn-primary">Create New</a>
+        }
+    }
+</div>
+<div style="text-align: center; margin-top: 20px;">
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+    }
+</div>
