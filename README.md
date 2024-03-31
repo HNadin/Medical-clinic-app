@@ -31,6 +31,7 @@ This project is an MVC (Model-View-Controller) application developed in C# that 
 2. Create a database in your DBMS.
 3. Change the database connection string in the `appsettings.json` file to match your settings.
 4. Open a command prompt in the project root folder and run the following commands:
+
    ```bash
    dotnet restore
    dotnet ef database update
