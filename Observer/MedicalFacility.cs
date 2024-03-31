@@ -3,7 +3,7 @@ using Medical_clinic.Models;
 using Medical_clinic.Observer;
 
 // Інтерфейс спостерігача
-public interface IObservable
+interface IObservable
 {
     void Attach(IObserver observer, ApplicationContext context);
     void Detach(IObserver observer, ApplicationContext context);
@@ -13,7 +13,7 @@ public interface IObservable
 
 public class MedicalFacility : IObservable
 {
-    private List<IObserver> _observers = new List<IObserver>();
+    readonly List<IObserver> _observers = new List<IObserver>();
 
     // Клас для підписки на сповіщення
     public void Attach(IObserver observer, ApplicationContext context)
@@ -67,7 +67,7 @@ public class MedicalFacility : IObservable
         }
     }
 
-    private void WriteToFile(string userEmail, NewService newService)
+    private static void WriteToFile(string userEmail, NewService newService)
     {
         // Ось код, який записує інформацію до файлу про отримане сповіщення
         string filePath = $"NotificationLog_{DateTime.Now.ToString("yyyyMMdd")}.txt";
