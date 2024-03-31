@@ -4,7 +4,6 @@ using Medical_clinic.Models;
 using Medical_clinic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
-using System.Diagnostics;
 
 namespace Medical_clinic.Controllers
 {
@@ -12,8 +11,6 @@ namespace Medical_clinic.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ApplicationContext _context;
-        private readonly Random _random;
-        private readonly Stopwatch _stopwatch;
 
         // Конструктор контролера AppointmentsController.
         // Використовує Dependency Injection для отримання UserManager та ApplicationContext.
@@ -21,8 +18,6 @@ namespace Medical_clinic.Controllers
         {
             _userManager = userManager;
             _context = context;
-            _random = new Random();
-            _stopwatch = new Stopwatch();
 
         }
 

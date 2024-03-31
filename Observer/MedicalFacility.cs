@@ -1,9 +1,6 @@
 ﻿using Medical_clinic.Data;
 using Medical_clinic.Models;
 using Medical_clinic.Observer;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
 
 // Інтерфейс спостерігача
 public interface IObservable
